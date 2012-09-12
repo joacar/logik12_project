@@ -23,9 +23,9 @@ def writeKb(inputFile):
 			line = f.readline()
 			for c in range(nrCols):
 				try:
-					islands.append([[r,c], int(line[c])])
+					islands.append([[r+1,c+1], int(line[c])])
 				except Exception, e:
-					islands.append([[r,c], line[c]])				
+					islands.append([[r+1,c+1], line[c]])				
 	except Exception, e:
 		print 'Could not open file: {0}\n{1}'.format(inputFile, e)
 	# finally:	# finally:
