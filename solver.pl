@@ -29,7 +29,13 @@ checkCoordinate([H,_], [[H,_]|_]).
 checkCoordinate([H,_], [[_,_]|T]):-
 	checkCoordinate([H,_], T).
 
-createCoordinateList([],Res,Res).
-createCoordinateList([[X,_]|T], Res, Res1):-
-	append([X],Res,Res1),
-	createCoordinateList(T, Res1, Res1).
+getCoordinates([],[]).
+getCoordinates([[Coord,_]|T], [[Coord]|Coords]):-
+	getCoordinates(T, Coords).
+
+getIslands([], []).
+getIslands([[Coords, B]|T], [[Coords,B]|Islands]):-
+	integer(B),
+	getIslands(T, Islands).
+getIslands([_|T], Islands):-
+	getIslands(T,Islands).
