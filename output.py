@@ -1,0 +1,85 @@
+#!/usr/bin/env python
+
+import sys
+import getopt
+
+V_BRIDGE = {
+	1 : '|',
+	2 : '"'
+}
+
+H_BRIDGE = {
+	1 : '-',
+	2 : '='
+}
+
+def main(argv):
+	try:
+		if argv[1]:
+			printSolution(argv[1], argv[2])
+	except Exception, e:
+		raise e
+
+def printSolution(inputFile, solutionFile):
+	grid = []
+	try:
+		f = open(inputFile, 'r')
+		print 'Parsing input file: {0}'.format(inputFile)
+
+		gridDimensions = f.readline().split(' ')
+		nrRows = int(gridDimensions[0])
+		nrCols = int(gridDimensions[1])
+		grid = ['.' for r in range(nrRows)]
+		for c in range(nrCols):
+			grid[c] = ['.' for a in range(nrCols)]
+		
+		for r in range(nrRows):
+			line = f.readline()
+			for c in range(nrCols):
+				grid[r][c] = line[c]
+	except Exception, e:
+		print 'Could not open input file: {0}\n{1}'.format(inputFile, e)
+	solution = [
+		[[0,0],[0,2],1],
+		[[0,0],[2,0],1],
+		[[2,0],[2,2],2],
+		[[2,2],[2,4],1],
+		[[2,0],[4,0],1],
+		[[4,0],[4,4],2]
+	]
+	try:
+		f = open(solutionFile, 'r')
+		# TODO: Parse input file in format of solution
+		# for line in f.readlines():
+		# 	solution.append(line)
+	except Exception, e:
+		print 'Could not open prolog solution file: {0}\n{1}'.format(solutionFile, e)
+	
+	solutionFile = inputFile.split('/')[1].split('.')[0] + '.out'
+	try:
+		f = open(solutionFile, 'w')
+		for sol in solution:
+			sRow, sCol = sol[0][0], sol[0][1]
+			eRow, eCol = sol[1][0], sol[1][1] 
+			bridges = sol[2]
+			if sRow == eRow: # horizontal
+				for i in interval(sCol, eCol):
+					#print 'H: Start: {0},{1} End: {2},{3} Interval: {4}'.format(sRow, sCol, eRow, eCol, interval(sCol, eCol))
+					grid[sRow][i] = H_BRIDGE[bridges]
+			else:	# vertical
+				for i in interval(sRow, eRow):
+					#print 'V: Start: {0},{1} End: {2},{3} Interval: {4}'.format(sRow, sCol, eRow, eCol, interval(sCol, eCol))
+					grid[i][sCol] = V_BRIDGE[bridges]
+		print 'Writing solution file {0}'.format(solutionFile)
+		for r in range(nrRows):
+			for c in range(nrCols):
+				f.write(grid[r][c])
+			f.write('\n')
+	except Exception, e:
+		print 'Could not write solution file{0}\n{1}'.format(solutionFile, e)
+
+def interval(start, end):
+	return filter(lambda x: x > min(start,end), range(max(start, end)))
+
+if __name__ == "__main__":
+	main(sys.argv[1:])
