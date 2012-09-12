@@ -16,10 +16,14 @@ coords([[C1, _]|IS], [C1|CS]) :- coords(IS,CS).
 %allowedX(X) :- X > 0, maxX(MX), X < MX.
 %allowedY(Y) :- Y > 0, maxY(MY), Y < MY.
 
-adjacentTo([X,Y], [AX,Y]) :- AX is X + 1.
-adjacentTo([X,Y], [X,AY]) :- AY is Y + 1.
+adjacentTo([X,Y], [AX,Y]) :- AX is X + 1, AX =< 3.
+adjacentTo([X,Y], [X,AY]) :- AY is Y + 1, AY =< 5.
 adjacentTo([X,Y], [AX,Y]) :- AX is X - 1, AX > 0.
 adjacentTo([X,Y], [X,AY]) :- AY is Y - 1, AY > 0.
 
 bridgeable(B) :- 
-  islandCoord(A), islandCoord(C), adjacentTo(A,B), adjacentTo(C,B).
+  islandCoord(A), 
+  islandCoord(C),
+  A \= C,
+  adjacentTo(A,B),
+  adjacentTo(C,B). 
