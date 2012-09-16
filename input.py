@@ -36,6 +36,7 @@ def writeKb(inputFile):
 	try:
 		f = open(outputFile, 'w')
 		prettyPrint = lambda x, comma: f.write('\t{0}{1}\n'.format(x, comma))
+		f.write('rows({0}).\ncolumns({1}).\n'.format(nrRows, nrCols))
 		f.write('grid([\n')
 		i = 1
 		for island in islands:
