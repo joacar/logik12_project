@@ -53,7 +53,7 @@ def writeKb(inputFile):
 	finally:
 		pass
 	
-	engineFile = inputFile + '.pl'
+	engineFile = inputFile + '_engine.pl'
 	try:
 		f = open(engineFile, 'w')
 		print 'Writing engine file: {0}'.format(engineFile)

@@ -2,7 +2,7 @@ TESTS_FOLDER = tests/
 
 %.txt:
 	./input.py -c $(TESTS_FOLDER)$*.txt
-	sicstus -l $*.pl
+	sicstus -l $*_engine.pl
 
 clean:
-	rm -f *~ *.kb *.out
+	rm -f *~ *_db.pl *_engine.pl *.out
