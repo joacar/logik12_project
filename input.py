@@ -32,9 +32,11 @@ def writeKb(inputFile):
 
 	# 	f.close()
 
-	outputFile = inputFile.split('/')[1].split('.')[0] + ".pl"
+	inputFile = inputFile.split('/')[1].split('.')[0]
+	dbFile = inputFile + "_db.pl"
 	try:
-		f = open(outputFile, 'w')
+		f = open(dbFile, 'w')
+		print 'Writing database file: {0}'.format(dbFile)
 		prettyPrint = lambda x, comma: f.write('\t{0}{1}\n'.format(x, comma))
 		f.write('rows({0}).\ncolumns({1}).\n'.format(nrRows, nrCols))
 		f.write('grid([\n')
@@ -47,9 +49,20 @@ def writeKb(inputFile):
 			i += 1
 		f.write(']).')
 	except Exception, e:
-		print 'Could not write file: {0}\n{1}'.format(outputFile, e)
+		print 'Could not write file: {0}\n{1}'.format(dbFile, e)
 	finally:
 		pass
 	
+	engineFile = inputFile + '.pl'
+	try:
+		f = open(engineFile, 'w')
+		print 'Writing engine file: {0}'.format(engineFile)
+		f.write(':-consult(\'{0}\').\n'.format(dbFile))
+		f.write(':-consult(\'hashi.pl\').\n')
+		#f.write(':- grid(Grid),\ntransform(Grid,ListMatrix),\ngenerate(ListMatrix, Solution),\ntest(Solution),\nprintSolution(Solution),')
+		f.write(':-grid(Grid),transform(Grid,ListMatrix),printListMatrix(ListMatrix),')
+		f.write('halt.')
+	except Exception, e:
+		raise e
 if __name__ == "__main__":
 	main(sys.argv[1:])
