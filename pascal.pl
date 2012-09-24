@@ -16,15 +16,12 @@ repeat(Item, N, [Item | Rest]) :- N > 0, M is N-1, repeat(Item, M, Rest).
 
 duplicate(L, D) :- append(L, L, D).
 
-take(0, _, []).
-take(N, L, [R1|Rest]) :- 
-  select(R1, L, L2),
-  N > 0, M is N-1,
-  take(M, L2, Rest).
-
 comb(0,_,[]).
 comb(N, [X|T], [X|Rest]):- N > 0, M is N-1, comb(M, T, Rest).
 comb(N, [_|T], Rest) :- N > 0, comb(N, T, Rest).
+
+difference(Xs,Ys,D) :- 
+  findall(X,(member(X,Xs),\+(member(X,Ys))),D).
 
 %% Map predicates
 
@@ -34,14 +31,6 @@ northward([X,Y], [X,Y1]) :- Min is 0, Max is Y-1, range(Y1, Min, Max).
 eastward([X,Y], [X1,Y]) :- width(W), Min is X+1, Max is W-1, range(X1, Min, Max).
 southward([X,Y], [X,Y1]) :- height(H), Min is Y+1, Max is H-1, range(Y1, Min, Max).
 westward([X,Y], [X1,Y]) :- Min is 0, Max is X-1, range(X1, Min, Max). 
-
-% Distances in the X and Y axes
-
-distance([X,Y1], [X,Y2], D) :- Y2 =< Y1, D is Y1 - Y2.
-distance([X,Y1], [X,Y2], D) :- Y2 > Y1, D is Y2 - Y1.
-
-distance([X1,Y], [X2,Y], D) :- X1 =< X2, D is X1 - X2.
-distance([X1,Y], [X2,Y], D) :- X1 > X2, D is X2 - X1. 
 
 % Islands
 
@@ -70,29 +59,63 @@ bridgeable(Start, End) :-
   closestSouthIsland(Start, End);
   closestWestIsland(Start, End).
 
-possibleBridgesFrom(Start, Bridges) :- 
-  findall(End, bridgeable(Start, End), EndPoints), 
-  duplicate(EndPoints, DupEndPoints), % As we can have two bridges to the same endpoint
-  bridgeLimit(Start, L),
-  comb(L, DupEndPoints, Possibilities),
-  length(Possibilities, P),
-  repeat(Start, P, StartPoints),
-  zip(StartPoints, Possibilities, Bridges).
+notTooManyTrailingBridgesFor(Island, StartIslands) :-
+  length(StartIslands, S),
+  bridgeLimit(Island, L),
+  S =< L.
 
-% possibleBridgesFrom should also take a list of CURRENT BRIDGES into account, and only add consistent bridge-bindings to that list.
-% This allows us to push some of the test into our generation, by not producing bindings that are inconsistent
-% with ones that already exist. Consistency means that if there is a bridge from I1 to I2, then there should be a bridge 
-% from I2 to I1, and we should only add as many more bridges as are required given the ones already assigned.
-% If there are already too many bridges for one island, we should fail.
+buildBridgesBetween(Start, EndPoints, Bridges) :-
+  length(EndPoints, L),
+  repeat(Start, L, StartPoints),
+  zip(StartPoints, EndPoints, Bridges).
 
-% A possible solution is then a list of bridges [StartIsland, EndIsland]: [[I1, I2], [I2, I1], [I1, I3] ...]
+% Given some bridges and an island, ensure that 
+% every bridge TO the island has a corresponding
+% bridge FROM that island. Fail if the bridge has
+% reached its limit.
+connectTrailingBridges(BridgesIn, Island, BridgesOut) :-
+  findall(Start, member([Start, Island], BridgesIn), StartIslands),
+  notTooManyTrailingBridgesFor(Island, StartIslands),
+  buildBridgesBetween(Island, StartIslands, NewBridges),
+  append(BridgesIn, NewBridges, BridgesOut).
 
-% The solutions needs to pass one more constraint: connected(Bridges), which should be straightforward given a list of bridges.
+bridgesLeftToBuild(BridgesBuilt, Island, Left) :-
+  findall(Start, member([Start, Island], BridgesBuilt), BridgesToMe),
+  length(BridgesToMe, B),
+  bridgeLimit(Island, Limit),
+  Left is Limit - B.
 
-% PROBLEMS: | ?- possibleBridgesFrom([0,0], Bridges).
-%Bridges = [[[0,0],[2,0]],[[0,0],[0,2]]] ? ; As we can see, the duplicate EndPoints are treated differently everywhere, leading to redundancy
-%Bridges = [[[0,0],[2,0]],[[0,0],[2,0]]] ? ;
-%Bridges = [[[0,0],[2,0]],[[0,0],[0,2]]] ? ;
-%Bridges = [[[0,0],[0,2]],[[0,0],[2,0]]] ? ;
-%Bridges = [[[0,0],[0,2]],[[0,0],[0,2]]] ? ;
-%Bridges = [[[0,0],[2,0]],[[0,0],[0,2]]] ? ;
+buildNewBridges(BridgesIn, Island, NumBridges, BridgesOut) :-
+  findall(Start, member([Start, Island], BridgesIn), BridgesToMe),
+  findall(End, bridgeable(Island, End), EndPoints), 
+  difference(EndPoints, BridgesToMe, Targets),      % Only build to Islands that are not already connected to me
+  duplicate(Targets, DupTargets),                   % As we can have two bridges to the same target
+  comb(NumBridges, DupTargets, Possibilities),      % <-- Do this as a reduction with a set to preserve uniqueness?
+  buildBridgesBetween(Island, Possibilities, NewBridges),
+  append(BridgesIn, NewBridges, BridgesOut).
+
+%% Solution
+
+% Reducing relation
+
+accumulateBridges(BridgesIn, Island, BridgesOut) :-
+  connectTrailingBridges(BridgesIn, Island, CompleteBridges),
+  bridgesLeftToBuild(CompleteBridges, Island, ToMake),
+  buildNewBridges(CompleteBridges, Island, ToMake, BridgesOut).
+
+% Reduction
+
+generate(Solution, [], Solution).
+generate(BridgesIn, [Island | Rest], BridgesOut) :-
+  accumulateBridges(BridgesIn, Island, Accumulated),
+  generate(Accumulated, Rest, BridgesOut).
+generate(Solution) :-
+  findall(I, island(I), Islands),
+  generate([], Islands, Solution).
+
+% Use SETS: http://www.sics.se/sicstus/docs/4.0.5/html/sicstus/lib_002dordsets.html#lib_002dordsets
+
+% Add global constraints:
+%  (1) isConnected(Solution)
+%  (2) noCrossing(Solution)
+%  (3) Go through the Islands in Most Constrained Order 

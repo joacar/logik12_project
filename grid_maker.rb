@@ -34,7 +34,7 @@ def render_item(item)
   if number?(label)
     "island(#{coords}).\nbridgeLimit(#{coords}, #{label})."
   else
-    "water(#{coords})."
+    nil
   end
 end
 
@@ -42,5 +42,5 @@ end
 File.open(outfile, "w") do |f|
   f.puts grid_size
   f.puts
-  f.puts grid.map { |i| render_item i }.join("\n")
+  f.puts grid.map { |i| render_item i }.select{ |i| not i.nil? }.join("\n")
 end
