@@ -1,0 +1,38 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+\usepackage[utf8x]{inputenc}
+\usepackage[swedish,english]{babel}
+\usepackage{graphicx}
+\usepackage{float}
+% IMPORTANT! This need to be the last package loaded since it overwrites features from others to work correctly
+\usepackage[pdfusetitle=true, pdfauthor={Pascal Chatterjee and Joakim Carselind}, pdfsubject={Solving Hashiwokakero, a Japanese logic puzzle, in prolog}, pdfkeywords={logic puzzle, prolog, hashiwokakero}, pdftex]{hyperref}
+
+\title{Solving Hashiwokakero in Prolog}
+\author{Pascal Chatterjee and Joakim Carselind \\ \small{\{joacar, pascalc\}@kth.se}}
+
+\begin{document}
+\maketitle
+
+\section*{Introduction}
+Hashiwokakero is a Japanese puzzle that involves connecting islands with bridges under strict constraints:
+\begin{enumerate}
+	\item They must begin and end at distinct islands, travelling a straight line in between.
+	\item They must not cross any other bridges or islands.
+	\item They may only run perpendicularly.
+	\item At most two bridges connect a pair of islands.
+	\item The number of bridges connected to each island must match the number on that island.
+	\item The bridges must connect the islands into a single connected group.
+\end{enumerate}
+The number of the islands is one to eight.
+The puzzle is a typical constraint satisfaction problem and Prolog is well suited for dealing with problems of that nature.
+
+Translate the six constraints from english into logic clauses, translate those clauses into facts that Prolog can interpretate and start the resolution process. Sounds simple?
+
+\section*{The problem}
+The constraints have certain domain in the meaning of refering to a local constraint or a global constraint. The constraint that all islands must be connected into a single connected group is a global constraint.
+
+\section*{A first attempt}
+A first attempt, a naive approach if one so like, to solve the problem is to generate all possible configurations and test each one of them until a configuration satisifying the constraints is found and accepted as the solution.
+
+\end{document}
