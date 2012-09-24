@@ -4,16 +4,6 @@ writeSolution(L):-
 	seen,
 	told.
 
-printSolution([]).
-printSolution([H|T]):-
-	printSolution(H),
-	nl,
-	printSolution(T).
-printSolution([[R,C], [R1,C1], B]):-
-	write(R), write(' '), write(C), write(' '),
-	write(R1), write(' '),write(C1), write(' '),
-	write(B).
-
 generate(List, Solution):-
 	generate(List, [], Solution).
 	% verify solution: Check remaining constraints
@@ -28,6 +18,14 @@ connect([C,B],[],L,L):-
 	sumblist(C,L,R),
 	sumlist(R, S),
 	S == B.
+/*
+If A and B are not connected,
+check how many bridges are connected to A and B,
+if there are room for a bridge between A and B,
+select the minimum of A and B and produce possible
+bridge configurations,
+select the first option X and connect A and B with X
+*/
 connect(A, [B|T], Acc, L):-
 	[Co1,Ab] = A, [Co2,Bb] = B,
 	\+ connected(Co1,Co2,Acc),
@@ -45,10 +43,14 @@ connect(A, [B|T], Acc, L):-
 		connect(A,T,Acc,L);
 		connect(A,T, [[Co1,Co2,Aa]|Acc], L)
 	).
+% If A and B are connected, move on
 connect([A,X], [[B,_]|T], Acc, L):-
 	connected(A,B,Acc),
 	connect([A,X],T,Acc,L).
 
+/*
+Check if two islands are connected. The connection is undirected
+*/
 connected(_,_,[]):-false.
 connected(X,Y,[[X,Y,_]|_]).
 connected(X,Y,[[Y,X,_]|_]). % Transitivity/undirected edges
@@ -56,16 +58,16 @@ connected(X,Y,[_|T]):-
 	connected(X,Y,T).
 
 /*
-Takes an coordinate of an island along with a list of the connected islands
+Takes a coordinate of an island along with a list of the connected islands
 and computes the number of connected bridges it has
 */
 % sumblist(+Coordinate, +Connected, -Sum of bridges)
-sumblist(_,[],[0]).
+sumblist(_,[],[0]):-!.
 sumblist(C, [H|T], L):-
-	sumblist(C, [H|T], [], L).
+	sumblist(C, [H|T], [], L), !.
 
-sumblist(_,[],[],[0]).
-sumblist(_, [], L, L).
+sumblist(_,[],[],[0]):-!.
+sumblist(_, [], L, L):-!.
 sumblist(C, [[C, _, B]|T], Acc, L):-
 	sumblist(C,T,[B|Acc], L).
 sumblist(C, [[_, C, B]|T], Acc, L):-
@@ -213,3 +215,13 @@ printIslands([H|T]):-
 	T \= [],
 	write(H), write(', '),
 	printIslands(T).
+
+printSolution([]).
+printSolution([H|T]):-
+	printSolution(H),
+	nl,
+	printSolution(T).
+printSolution([[R,C], [R1,C1], B]):-
+	write(R), write(' '), write(C), write(' '),
+	write(R1), write(' '),write(C1), write(' '),
+	write(B).
