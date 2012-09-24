@@ -59,8 +59,11 @@ def writeKb(inputFile):
 		print 'Writing engine file: {0}'.format(engineFile)
 		f.write(':-consult(\'{0}\').\n'.format(dbFile))
 		f.write(':-consult(\'hashi.pl\').\n')
-		#f.write(':- grid(Grid),\ntransform(Grid,ListMatrix),\ngenerate(ListMatrix, Solution),\ntest(Solution),\nprintSolution(Solution),')
-		f.write(':-grid(Grid),transform(Grid,ListMatrix),printListMatrix(ListMatrix),')
+		f.write(':-grid(Grid),\n')
+		f.write('transform(Grid,ListMatrix),\n')
+		f.write('generate(ListMatrix, Solution),\n'),
+		#f.write('test(Solution),\n')
+		f.write('writeSolution(Solution),\n')
 		f.write('halt.')
 	except Exception, e:
 		raise e

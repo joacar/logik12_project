@@ -15,16 +15,15 @@ H_BRIDGE = {
 
 def main(argv):
 	try:
-		if argv[1]:
-			printSolution(argv[1], argv[2])
+		printsolutionFile(argv[1], argv[2])
 	except Exception, e:
-		raise e
+		print 'Usage: ./output.py -c <test.txt> <solution.txt>'
 
-def printSolution(inputFile, solutionFile):
+def printsolutionFile(mapFile, solutionFile):
 	grid = []
 	try:
-		f = open(inputFile, 'r')
-		print 'Parsing input file: {0}'.format(inputFile)
+		f = open(mapFile, 'r')
+		print 'Parsing input file: {0}'.format(mapFile)
 
 		gridDimensions = f.readline().split(' ')
 		nrRows = int(gridDimensions[0])
@@ -38,30 +37,13 @@ def printSolution(inputFile, solutionFile):
 			for c in range(nrCols):
 				grid[r][c] = line[c]
 	except Exception, e:
-		print 'Could not open input file: {0}\n{1}'.format(inputFile, e)
-	solution = [
-		[[0,0],[0,2],1],
-		[[0,0],[2,0],1],
-		[[2,0],[2,2],2],
-		[[2,2],[2,4],1],
-		[[2,0],[4,0],1],
-		[[4,0],[4,4],2]
-	]
+		print 'Could not open input file: {0}\n{1}'.format(mapFile, e)
+
 	try:
 		f = open(solutionFile, 'r')
-		# TODO: Parse input file in format of solution
-		# for line in f.readlines():
-		# 	solution.append(line)
-	except Exception, e:
-		print 'Could not open prolog solution file: {0}\n{1}'.format(solutionFile, e)
-	
-	solutionFile = inputFile.split('/')[1].split('.')[0] + '.out'
-	try:
-		f = open(solutionFile, 'w')
-		for sol in solution:
-			sRow, sCol = sol[0][0], sol[0][1]
-			eRow, eCol = sol[1][0], sol[1][1] 
-			bridges = sol[2]
+		for l in f.readlines():
+			sRow,sCol,eRow,eCol,bridges = map( lambda x: int(x)-1, l.split(' '))
+			bridges += 1;
 			if sRow == eRow: # horizontal
 				for i in interval(sCol, eCol):
 					#print 'H: Start: {0},{1} End: {2},{3} Interval: {4}'.format(sRow, sCol, eRow, eCol, interval(sCol, eCol))
@@ -70,13 +52,25 @@ def printSolution(inputFile, solutionFile):
 				for i in interval(sRow, eRow):
 					#print 'V: Start: {0},{1} End: {2},{3} Interval: {4}'.format(sRow, sCol, eRow, eCol, interval(sCol, eCol))
 					grid[i][sCol] = V_BRIDGE[bridges]
-		print 'Writing solution file {0}'.format(solutionFile)
+	except Exception, e:
+		print 'Could not open solution file: {0}\n{1}'.format(solutionFile, e)	
+	
+	
+	path = mapFile.split('/')
+	if(len(path) == 0):
+		solutionFile = mapFile.split('.')[0]
+	else:
+		solutionFile = path[len(path)-1].split('.')[0]
+	solutionFile += '.out'
+	print 'Writing solution file: {0}'.format(solutionFile)
+	try:
+		f = open(solutionFile, 'w')
 		for r in range(nrRows):
 			for c in range(nrCols):
 				f.write(grid[r][c])
 			f.write('\n')
 	except Exception, e:
-		print 'Could not write solution file{0}\n{1}'.format(solutionFile, e)
+		print 'Could not write solution file{0}\n{1}'.format(solutionFileFile, e)
 
 def interval(start, end):
 	return filter(lambda x: x > min(start,end), range(max(start, end)))
