@@ -27,7 +27,7 @@ File information
 * hashi.pl: 	Contains the logic to solve Hashiwokakero
 * input.py: 	Produces the knowledge base file containing the dimension of the grid and 				  the grid as a predicate. Also produces the engine prolog file that 						consults the knowledge base for facts about the puzzle and the hashi.pl 				and then executes the solve predicate and writes the solution to solution.				  out
 * output.py: 	Takes the original test file and the prolog solution and prints a nice 					formatted solution with the connected islands
-Makefile: 		To generate and execute tests and clean
-tests/: 		input files .txt
-solutions/: 	output files. out
-report/: 		Report and presentation for seminar
+* Makefile: 	To generate and execute tests and clean
+* tests/: 		input files .txt
+* solutions/: 	output files. out
+* report/: 		Report and presentation for seminar
