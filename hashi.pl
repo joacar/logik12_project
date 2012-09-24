@@ -55,60 +55,48 @@ connected(X,Y,[[Y,X,_]|_]). % Transitivity/undirected edges
 connected(X,Y,[_|T]):-
 	connected(X,Y,T).
 
-%sumb(+Island,+Island,+Connected,-BridgesLeft, -BridgesLeft)
+/*
+Takes an coordinate of an island along with a list of the connected islands
+and computes the number of connected bridges it has
+*/
+% sumblist(+Coordinate, +Connected, -Sum of bridges)
 sumblist(_,[],[0]).
 sumblist(C, [H|T], L):-
 	sumblist(C, [H|T], [], L).
 
 sumblist(_,[],[],[0]).
 sumblist(_, [], L, L).
-sumblist(C, [H|T], Acc, L):-
-	[Cx, Cy, Bz] = H,
-	C == Cx,
-	C \= Cy,
-	sumblist(C,T,[Bz|Acc], L).
-sumblist(C, [H|T], Acc, L):-
-	[Cx, Cy, Bz] = H,
-	C == Cy,
-	C \= Cx,
-	sumblist(C,T,[Bz|Acc], L).
-sumblist(C, [H|T], Acc, L):-
-	[Cx, Cy, _] = H,
-	C \= Cy,
-	C \= Cx,
+sumblist(C, [[C, _, B]|T], Acc, L):-
+	sumblist(C,T,[B|Acc], L).
+sumblist(C, [[_, C, B]|T], Acc, L):-
+	sumblist(C,T,[B|Acc], L).
+sumblist(C, [_|T], Acc, L):-
 	sumblist(C,T,Acc, L).
 
-% Constraint: At most two bridges connects two islands
+/*
+Computes the minimum island number from two islands,
+taking the constraint 'At most two bridges connects two islands'
+into account
+*/
+%minb(+Island,+Island,-Bridges)
 minb([_,A], [_,B], R):-
 	min(A,B,R), R =< 2.
 minb([_,A], [_,B], 2):-
 	min(A,B,R), R > 2.
 min(A, B, A):- A =< B.
 min(A, B, B):- A > B.
-max(A,B,A):- A >= B.
-max(A,B,B):- A < B.
 
+/*
+Takes the island number and produces possible bridge connections
+as a list, starting with the highest number
+*/
+%bridges(+Bridges, -Possible connections)
 bridges(N,L):-
 	N >= 0, bridges(N,0,[],L).
 bridges(N,N1,L,L):-N1 is N + 1, !.
 bridges(N,N1,Acc,L):-
 	N2 is N1 + 1,
 	bridges(N,N2,[N1|Acc],L).
-
-enumerate(1,[1]).
-enumerate(2,[1,1]).
-enumerate(2,[2]).
-enumerate(3,[1,1,1]).
-enumerate(3,[1,2]).
-enumerate(4,[1,1,1,1]).
-enumerate(4,[1,1,2]).
-enumerate(4,[2,2]).
-enumerate(5,[1,1,1,2]).
-enumerate(5,[1,2,2]).
-enumerate(6,[1,1,2,2]).
-enumerate(6,[2,2,2]).
-enumerate(7,[2,2,2,1]).
-enumerate(8,[2,2,2,2]).
 
 select(X,[X|T],T).
 select(X,[H|T1],[H|T2]):-
@@ -125,7 +113,10 @@ sumlist([],X,X).
 sumlist([H|T], Acc, X):-
 	Acc1 is Acc + H,
 	sumlist(T,Acc1,X).
-% Transforms a matrix graph into a list graph (adjacent list)
+/*
+Transforms a matrix graph into a list graph (adjacent list)
+*/
+% transform(+Grid, -Adjacent list)
 transform(Grid, AdjacentList) :-
 	islands(Grid, Islands),
 	transform(Islands, Islands, AdjacentList).
@@ -136,6 +127,11 @@ transform([H|T], Islands, [[H|[Adjacent]]|Adjacencies]) :-
 	directlyAdjacent(Coord,Islands,Adjacent),
 	transform(T, Islands, Adjacencies), !.
 
+/*
+Computes all the directly adjacent islands by
+stepping north, east, south and west from the current island
+and stops when an island occurs
+*/
 directlyAdjacent([R,C], Islands, Res):-
 	adjacentTop([R,C], Islands, Top),
 	append(Top, [], Res1),
