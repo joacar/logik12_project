@@ -21,15 +21,15 @@ def main(argv):
 
 def printsolutionFile(mapFile, solutionFile):
 	grid = []
+	print 'Attempting to read input file: {0}'.format(mapFile)
 	try:
 		f = open(mapFile, 'r')
-		print 'Parsing input file: {0}'.format(mapFile)
 
 		gridDimensions = f.readline().split(' ')
 		nrRows = int(gridDimensions[0])
 		nrCols = int(gridDimensions[1])
 		grid = ['.' for r in range(nrRows)]
-		for c in range(nrCols):
+		for c in range(nrRows):
 			grid[c] = ['.' for a in range(nrCols)]
 		
 		for r in range(nrRows):
@@ -37,8 +37,9 @@ def printsolutionFile(mapFile, solutionFile):
 			for c in range(nrCols):
 				grid[r][c] = line[c]
 	except Exception, e:
-		print 'Could not open input file: {0}\n{1}'.format(mapFile, e)
+		print 'Error reading input file: {0}\n{1}'.format(mapFile, e)
 
+	print 'Attempting to read solution file: {0}'.format(solutionFile)	
 	try:
 		f = open(solutionFile, 'r')
 		for l in f.readlines():
@@ -53,7 +54,7 @@ def printsolutionFile(mapFile, solutionFile):
 					#print 'V: Start: {0},{1} End: {2},{3} Interval: {4}'.format(sRow, sCol, eRow, eCol, interval(sCol, eCol))
 					grid[i][sCol] = V_BRIDGE[bridges]
 	except Exception, e:
-		print 'Could not open solution file: {0}\n{1}'.format(solutionFile, e)	
+		print 'Error reading solution file: {0}\n{1}'.format(solutionFile, e)	
 	
 	
 	path = mapFile.split('/')
