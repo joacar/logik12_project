@@ -60,9 +60,10 @@ def writeKb(inputFile):
 		f.write(':-consult(\'{0}\').\n'.format(dbFile))
 		f.write(':-consult(\'hashi.pl\').\n')
 		f.write(':-grid(Grid),\n')
+		f.write('islands(Grid,Islands),\n')
 		f.write('transform(Grid,ListMatrix),\n')
 		f.write('generate(ListMatrix, Solution),\n'),
-		#f.write('test(Solution),\n')
+		f.write('test(Solution,Islands),\n')
 		f.write('writeSolution(Solution),\n')
 		f.write('halt.')
 	except Exception, e:
