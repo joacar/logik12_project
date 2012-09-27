@@ -28,9 +28,7 @@ def writeKb(inputFile):
 					islands.append([[r+1,c+1], line[c]])				
 	except Exception, e:
 		print 'Could not open file: {0}\n{1}'.format(inputFile, e)
-	# finally:	# finally:
-
-	# 	f.close()
+		return
 
 	inputFile = inputFile.split('/')[1].split('.')[0]
 	dbFile = inputFile + "_db.pl"
