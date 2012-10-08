@@ -6,7 +6,7 @@
 \usepackage{graphicx}
 \usepackage{float}
 % IMPORTANT! This need to be the last package loaded since it overwrites features from others to work correctly
-\usepackage[pdfusetitle=true, pdfauthor={Pascal Chatterjee and Joakim Carselind}, pdfsubject={Solving Hashiwokakero, a Japanese logic puzzle, in prolog}, pdfkeywords={logic puzzle, prolog, hashiwokakero}, pdftex]{hyperref}
+\usepackage[pdfusetitle=true, pdfauthor={Pascal Chatterjee and Joakim Carselind}, pdfsubject={Solving Hashiwokakero, a Japanese logic puzzle, in Prolog}, pdfkeywords={logic puzzle, prolog, hashiwokakero}, pdftex]{hyperref}
 
 \title{Solving Hashiwokakero in Prolog}
 \author{Pascal Chatterjee and Joakim Carselind \\ \small{\{joacar, pascalc\}@kth.se}}
@@ -17,22 +17,60 @@
 \section*{Introduction}
 Hashiwokakero is a Japanese puzzle that involves connecting islands with bridges under strict constraints:
 \begin{enumerate}
-	\item They must begin and end at distinct islands, travelling a straight line in between.
-	\item They must not cross any other bridges or islands.
-	\item They may only run perpendicularly.
-	\item At most two bridges connect a pair of islands.
-	\item The number of bridges connected to each island must match the number on that island.
-	\item The bridges must connect the islands into a single connected group.
+	\item An island can only have bridges to horizontally/vertically adjacent islands.
+	\item The arity of an island must exactly equal its number one to eight
+	\item There can be at most two bridges between islands.
+	\item Bridges cannot cross each other.
+	\item The solution must form a connected component.
 \end{enumerate}
-The number of the islands is one to eight.
-The puzzle is a typical constraint satisfaction problem and Prolog is well suited for dealing with problems of that nature.
+Hashiwokakero is similar to Sudoko and Sudoko can be reduced to graph coloring which is NP-complete so Hashiwokakero probably is NP-complete too. As Sudoko, Hashiwokakero can be formulated as a constraint satisfaction problem.  
 
-Translate the six constraints from english into logic clauses, translate those clauses into facts that Prolog can interpretate and start the resolution process. Sounds simple?
+\section*{Constraint satisfaction problem}
+We need to encode the constraints one to five above to a readable form and readable ought to be viewed from Prologs perspective. Prolog is developed from first-order logic and is a declarative programming paradigm built on rules, facts and a powerful inference engine.
+
+Lets try to formulate the constraints as type of first-order logic which takes us closer to an actual implementation of the rules in Prolog
+
+\begin{enumerate}
+	\item $\exists x\exists a \exists b \quad [adjacent(a,x) \land adjacent(x,b), a \neq b]$
+	\item $\exists x \forall i \quad [adjacent(x,i) \rightarrow \sum_i connected(x,i) = arity(x)]$
+	\item $\exists x \exists y \quad [adjacent(x,y) \land connected(x,y) \leq 2]$
+	\item $\forall x \forall y \quad [disjoint(\{horizontalConnected(x,y)\}, \{verticalConnected(x,y)\})]$
+	\item $\exists x \exists y \quad [path(x,i_0) \land path(i_0,i_1) \land \ldots \land path(i_k,y) \land i_j \in \{V\} \setminus \{x,y\}$
+\end{enumerate}
 
 \section*{The problem}
-The constraints have certain domain in the meaning of refering to a local constraint or a global constraint. The constraint that all islands must be connected into a single connected group is a global constraint.
-
+The input is a map with size $m \times n$ containing a number of islands $i$ and potential bridge locations $mn - i$ that naturally can be viewed as water. We definied location $(0,0)$ to be the upper left corner and $(x,y)$ where $x$ is the x-axists and $y$ the y-axis, but positive. The location of the islands provide us with all information necessary to solve to problem. Below is an valid input map where the digits is the arity of the island at that location
+\[
+	\begin{array}{lllll}
+	5 & 5 \\
+	2 & . & 1 & . & . \\
+	. & . & . & . & . \\
+	4 & . & 3 & . & 1 \\
+	. & . & . & . & . \\
+	3 & . & . & . & 2 \\
+	\end{array}
+\]
+We need to extract the information needed and generate a solution that obeys the five constraints. A solution to the input above is is the edges that connect adjacent islands and the number of bridges connecting them
+\[
+ \begin{array}{lll}
+ 	[ \\
+ 		& [[0,0], [2,0], 1], & [[0,0], [0,2], 2], \\
+ 		& [[0,2], [2,2], 2], & [[0,2], [0,4], 1], \\
+ 		& [[2,2], [2,4], 1], & [[0,4], [4,4], 2] \\
+ 	] \\
+ \end{array}
+\]
 \section*{A first attempt}
-A first attempt, a naive approach if one so like, to solve the problem is to generate all possible configurations and test each one of them until a configuration satisifying the constraints is found and accepted as the solution.
+A first attempt, a naïve approach if one so like, to solve the problem is to generate all possible configurations and test each one of them until a configuration satisifying the constraints is found and accepted as the solution. The combinatorial nature of the problem results in a giant search space where lots of compution time is spent on ''stupid'' possible solutions. Clearly, we could do better.
+
+\section*{A intelligent attempt}
+Taking a functional programming view, the problem could be viewed as reducing a list of islands with a well constructed function and accumulate the result to produce a solution list of the type above. In this function, our aim is to continously narrow the search space by using a technique in CSP called forward-checking. In Prolog one would say that we ''push the tester into the generator''. The closer into the generator we can put the tester, the search space will be smaller since we do not validate incorrect solutions (in as large extent as in the naïve approach) in the tester. By cutting away uninteresting serach branches we can reduce the time solving the puzzle dramatically.
+
+\section*{Conclusion}
+The complete solution can be found in the Git repository \url{https://github.com/joacar/logik12_project.git}.
+
+\section*{References}
+To create the solution we have used various internet source, slides from the lecture, prolog book by Brno.
+
 
 \end{document}
