@@ -30,7 +30,7 @@ Hashiwokakero is similar to Sudoko and Sudoko can be reduced to graph coloring w
 We need to encode the constraints one to five above to a readable form and readable ought to be viewed from Prologs perspective. Prolog is developed from first-order logic and is a declarative programming paradigm built on rules, facts and a powerful inference engine.
 
 \section*{The problem}
-The input is a map with size $m \times n$ containing a number of islands and potential bridge locations that naturally can be viewed as water. We definied the coordinate $(1,1)$ to be the upper left corner and $(x,y)$ where $x$ is the x-axists and $y$ the y-axis, but positive. Below is an valid input map where the digits is the arity of the island at that location
+The input is a map with size $m \times n$ containing a number of islands and potential bridge locations that naturally can be viewed as water. Let $(x,y)$ be the coordinate and definie $(1,1)$ to be the upper left corner. $x$ increases to the right and $y$ increases down. Below is an valid input map where the digits is the arity of the island at that location
 \[
     \begin{array}{lllll}
     5 & 5 \\
@@ -79,13 +79,13 @@ Prolog outputs the solution like below
   [[0,4], [4,4], 2]
 ]
 \end{verbatim}
-and this is prettyfied by output.py to be more human-friendly.
+and this is prettyfied by output.py into a more human-friendly form.
 
 \section*{A first attempt}
 A first attempt, a naïve approach if one so like, to solve the problem is to generate all possible configurations and test each one of them until a configuration satisifying the constraints is found and accepted as the solution. The combinatorial nature of the problem results in a giant search space where lots of compution time is spent on ''stupid'' possible solutions. Clearly, we could do better.
 
 \section*{A intelligent attempt}
-Taking a functional programming view, the problem could be viewed as reducing a list of islands with a well constructed function and accumulate the result to produce a solution list of the type above. In this function, our aim is to continously narrow the search space by using a technique in CSP called forward-checking. In Prolog one would say that we ''push the tester into the generator''. The closer into the generator we can put the tester, the search space will be smaller since we do not validate incorrect solutions (in as large extent as in the naïve approach) in the tester. By cutting away uninteresting serach branches we can reduce the time solving the puzzle dramatically.
+Taking a functional programming view, the problem could be viewed as reducing a list of islands with a well constructed function and accumulate the result to produce a solution list of the type above. In this function, our aim is to continously narrow the search space by using a technique in CSP called forward-checking. In Prolog one would say that we ''push the tester into the generator''. The closer into the generator we can put the tester, the search space will be smaller since we do not validate incorrect solutions (in as large extent as in the naïve approach) in the tester. By cutting away uninteresting search branches we can reduce the time solving the puzzle dramatically.
 
 Here is a strategy to perform forward checking on each constraint.
 \begin{enumerate}
@@ -97,7 +97,7 @@ Here is a strategy to perform forward checking on each constraint.
 \end{enumerate}
 
 \section*{Conclusion}
-One important observation was that predicates that we thought was determinate really was not. Those predicates polluted the serach space with redundant configurations. In interest of effeciency we used the non-relational cut operator which meant that the order predicates are definied matter.
+One important observation was that predicates that we thought was determinate was not. Those predicates polluted the search space with redundant configurations. In interest of effeciency we used the non-relational cut operator which mean that the order predicates are definied does matter.
 In our solution we did not make use of any SICStus library that allows for our program to be executed by any other prolog system. (This was great since our SICStus license expired while writing this report and it runs perfectly fine under SWI).
 
 We are well aware the SICStus provides both a graph library and more importantly a CSP library which we refrained from using as it would made this report not worth writing.
